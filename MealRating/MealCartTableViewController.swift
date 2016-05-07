@@ -1,23 +1,17 @@
 //
-//  MealTableViewController.swift
+//  MealCartTableViewController.swift
 //  MealRating
 //
-//  Created by Ronald J. Suez A. on 5/3/16.
+//  Created by Ronald J. Suez A. on 5/6/16.
 //  Copyright © 2016 lloviznalabs. All rights reserved.
 //
 
 import UIKit
 
-class MealTableViewController: UITableViewController, mealCartDelegate {
+class MealCartTableViewController: UITableViewController {
     
-    // MARK: Properties
     var meals = [Meal]()
-    var mealCollection:MealCollection = MealCollection()
-    var selectedMeals = [Meal]()
-    var mealsCart = [Int:Int]()
-    var currentCell = Int()
-    
-    @IBOutlet weak var cartCountLabel: UIBarButtonItem!
+    var selectedMeals = [Int:Int]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,33 +20,10 @@ class MealTableViewController: UITableViewController, mealCartDelegate {
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigatonItem.rightBarButtonItem = self.editButtonItem()
-        // Load the sample data.
-        loadSampleMeals()
-    }
+        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     
-    func addToCart(meal: Meal) {
-        var count = 0
-        
-        if ((mealsCart.indexForKey(meal.id) == nil)) {
-            mealsCart[meal.id] = 1
-            selectedMeals += [meal]
-        } else {
-            mealsCart[meal.id] = mealsCart[meal.id]! + 1
-        }
-        
-        print(mealsCart)
-        for (_, value) in mealsCart {
-            count += value
-        }
-        
-        cartCountLabel.title = "Cart (\(String(count)))"
-        
     }
-    
-    func loadSampleMeals() {
-       meals = mealCollection.meals
-    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -73,36 +44,17 @@ class MealTableViewController: UITableViewController, mealCartDelegate {
 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cellIdentifier = "MealCartDetailTableViewCell"
+        
         let meal = meals[indexPath.row]
-        let cellIdentifier = "MealTableViewCell"
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath)  as! MealTableViewCell
-
-         //Configure the cell...
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath)  as! MealCartDetailTableViewCell
+        
+        //Configure the cell...
         cell.mealName.text = meal.name
         cell.mealImage.image = meal.photo
         cell.mealPrice.text = String(meal.price)
+        cell.mealQuantity.text = String(selectedMeals[meal.id]!)
         return cell
-    }
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if(segue.identifier == "MealDetail") {
-            let detail : ViewController = segue.destinationViewController as! ViewController
-            detail.delegate = self
-            detail.meal = meals[currentCell]
-        }
-        
-        if (segue.identifier == "MealCart") {
-            let cart:  MealCartTableViewController = segue.destinationViewController as! MealCartTableViewController
-            cart.selectedMeals =  mealsCart
-            cart.meals = selectedMeals
-        }
-        
-        
-    }
-    
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        currentCell = indexPath.row;
-        self.performSegueWithIdentifier("MealDetail", sender: nil)
     }
     
 
