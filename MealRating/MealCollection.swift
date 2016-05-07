@@ -11,7 +11,9 @@ import UIKit
 
 class MealCollection {
     
-    var meals = [Meal]()
+    var meals = [Int:Meal]()
+    var selectedMeals = [Int:Int]()
+    static let store = MealCollection()
     
     init() {
         let photo1 = UIImage(named: "Meal1")!
@@ -23,7 +25,7 @@ class MealCollection {
         let photo3 = UIImage(named: "Meal3")!
         let meal3 = Meal(id: 3,name: "Pasta with Meatballs", photo: photo3, rating: 3, price: 10.3)!
         
-        self.meals  += [meal1, meal2, meal3]
+        self.meals  = [meal1.id:meal1, meal2.id:meal2, meal3.id:meal3]
 
     }
     

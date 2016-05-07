@@ -7,11 +7,15 @@
 //
 
 import UIKit
+protocol mealCartCount {
+    func updateCount()
+}
 
-class MealCartTableViewController: UITableViewController {
+class MealCartTableViewController: UITableViewController, ButtonCellDelegate {
     
     var meals = [Meal]()
-    var selectedMeals = [Int:Int]()
+    
+    var delegate: mealCartCount? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,8 +25,10 @@ class MealCartTableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
-    
+        //selectedMeals = mealCollection.selectedMeals
+
     }
+    
 
 
     override func didReceiveMemoryWarning() {
@@ -30,6 +36,28 @@ class MealCartTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    // MARK: - ButtonCellDelegate
+    
+    func buttonCellTapped(cell: MealCartDetailTableViewCell, add: Bool) {
+        let index = self.tableView.indexPathForCell(cell)!.row;
+        let meal = meals[index]
+        
+        if (add) {
+            MealCollection.store.selectedMeals[meal.id]! += 1
+        } else {
+            MealCollection.store.selectedMeals[meal.id]! -= 1
+        }
+        
+        let indexPath = NSIndexPath(forRow: index, inSection: 0)
+        self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+        
+        if(delegate != nil) {
+            delegate?.updateCount()
+        }
+    }
+    
+    
+    
     // MARK: - Table view data source
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -53,7 +81,12 @@ class MealCartTableViewController: UITableViewController {
         cell.mealName.text = meal.name
         cell.mealImage.image = meal.photo
         cell.mealPrice.text = String(meal.price)
-        cell.mealQuantity.text = String(selectedMeals[meal.id]!)
+        cell.mealQuantity.text = String(MealCollection.store.selectedMeals[meal.id]!)
+        
+        if cell.buttonDelegate == nil {
+            cell.buttonDelegate = self
+        }
+        
         return cell
     }
     

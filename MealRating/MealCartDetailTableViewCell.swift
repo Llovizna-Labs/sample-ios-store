@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol ButtonCellDelegate {
+    func buttonCellTapped(cell: MealCartDetailTableViewCell, add: Bool)
+}
+
 class MealCartDetailTableViewCell: UITableViewCell {
     
     
@@ -15,6 +19,8 @@ class MealCartDetailTableViewCell: UITableViewCell {
     @IBOutlet weak var mealName: UILabel!
     @IBOutlet weak var mealPrice: UILabel!
     @IBOutlet weak var mealQuantity: UILabel!
+    
+    var buttonDelegate: ButtonCellDelegate?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -27,4 +33,15 @@ class MealCartDetailTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    @IBAction func removeItem(sender: AnyObject) {
+        if let delegate = buttonDelegate {
+            delegate.buttonCellTapped(self, add: false)
+        }
+    }
+    
+    @IBAction func addItem(sender: AnyObject) {
+        if let delegate = buttonDelegate {
+            delegate.buttonCellTapped(self, add: true)
+        }
+    }
 }

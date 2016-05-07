@@ -8,13 +8,13 @@
 
 import UIKit
 
-class MealTableViewController: UITableViewController, mealCartDelegate {
+
+class MealTableViewController: UITableViewController, mealCartDelegate, mealCartCount {
     
     // MARK: Properties
-    var meals = [Meal]()
+    var meals = [Int:Meal]()
     var mealCollection:MealCollection = MealCollection()
     var selectedMeals = [Meal]()
-    var mealsCart = [Int:Int]()
     var currentCell = Int()
     
     @IBOutlet weak var cartCountLabel: UIBarButtonItem!
@@ -28,26 +28,37 @@ class MealTableViewController: UITableViewController, mealCartDelegate {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigatonItem.rightBarButtonItem = self.editButtonItem()
         // Load the sample data.
+     
         loadSampleMeals()
     }
     
     func addToCart(meal: Meal) {
-        var count = 0
+      
         
-        if ((mealsCart.indexForKey(meal.id) == nil)) {
-            mealsCart[meal.id] = 1
+        if (MealCollection.store.selectedMeals.indexForKey(meal.id) == nil) {
             selectedMeals += [meal]
+            MealCollection.store.selectedMeals[meal.id] = 1
         } else {
-            mealsCart[meal.id] = mealsCart[meal.id]! + 1
+            MealCollection.store.selectedMeals[meal.id]? += 1
         }
         
-        print(mealsCart)
-        for (_, value) in mealsCart {
+ 
+        updateCount()
+    }
+    
+    
+    func updateCount() {
+        var count = 0
+        var total: Float = 0.0
+        
+        print(MealCollection.store.selectedMeals)
+        for (key, value) in MealCollection.store.selectedMeals {
             count += value
+            total += meals[key]!.price * Float(value)
+            
         }
-        
-        cartCountLabel.title = "Cart (\(String(count)))"
-        
+        cartCountLabel.title = "Cart (\(String(count))) - $(\(String(total)))"
+        print(count)
     }
     
     func loadSampleMeals() {
@@ -73,14 +84,14 @@ class MealTableViewController: UITableViewController, mealCartDelegate {
 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let meal = meals[indexPath.row]
+        let meal = meals[indexPath.row + 1]
         let cellIdentifier = "MealTableViewCell"
         let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath)  as! MealTableViewCell
 
          //Configure the cell...
-        cell.mealName.text = meal.name
-        cell.mealImage.image = meal.photo
-        cell.mealPrice.text = String(meal.price)
+        cell.mealName.text = meal!.name
+        cell.mealImage.image = meal!.photo
+        cell.mealPrice.text = String(meal!.price)
         return cell
     }
     
@@ -93,7 +104,7 @@ class MealTableViewController: UITableViewController, mealCartDelegate {
         
         if (segue.identifier == "MealCart") {
             let cart:  MealCartTableViewController = segue.destinationViewController as! MealCartTableViewController
-            cart.selectedMeals =  mealsCart
+            cart.delegate = self
             cart.meals = selectedMeals
         }
         
@@ -101,7 +112,8 @@ class MealTableViewController: UITableViewController, mealCartDelegate {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        currentCell = indexPath.row;
+        currentCell = indexPath.row + 1
+        print(currentCell)
         self.performSegueWithIdentifier("MealDetail", sender: nil)
     }
     
